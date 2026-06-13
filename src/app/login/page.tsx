@@ -149,9 +149,6 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          © 2025 SIXBRICK Activity Management System
-        </p>
       </div>
 
       {/* Shake Animation */}

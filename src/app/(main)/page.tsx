@@ -22,6 +22,16 @@ import {
 import { SKILL_COLORS, SKILL_OPTIONS, SET_OPTIONS } from '@/lib/types';
 import type { Activity } from '@/lib/types';
 
+const getEnlargedImageUrl = (url: string) => {
+  if (!url) return url;
+  return url
+    .replace(/w=200/g, 'w=500')
+    .replace(/h=200/g, 'h=500')
+    .replace(/=w200-h200/g, '=s500')
+    .replace(/=w200/g, '=w500')
+    .replace(/=s200/g, '=s500');
+};
+
 const ITEMS_PER_PAGE = 5;
 
 interface UploadedFile {
@@ -467,9 +477,16 @@ export default function DashboardPage() {
                     </td>
                     <td className="px-4 py-2">
                       {activity.images[0] ? (
-                        <div className="w-12 h-12 rounded border border-border overflow-hidden bg-white">
-                          <img src={activity.images[0]} alt="Preview" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                        </div>
+                        <a 
+                          href={getEnlargedImageUrl(activity.images[0])} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="block w-12 h-12 rounded border border-border overflow-hidden bg-white hover:opacity-80 transition-opacity" 
+                          title="คลิกดูภาพขนาดเต็ม"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <img src={getEnlargedImageUrl(activity.images[0])} alt="Preview" className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                        </a>
                       ) : (
                         <div className="w-12 h-12 rounded border border-border bg-gray-50 flex items-center justify-center">
                           <ImageIcon size={16} className="text-gray-300" />
@@ -644,19 +661,19 @@ export default function DashboardPage() {
                   <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
                     ภาพตัวอย่าง
                   </h4>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="flex flex-col gap-4">
                     {previewActivity.images.map((img, i) => (
                       <a
                         key={i}
-                        href={img}
+                        href={getEnlargedImageUrl(img)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="aspect-square bg-white border border-border rounded flex items-center justify-center overflow-hidden hover:shadow-md transition-all relative group"
-                        title="คลิกเพื่อดูภาพขนาดเต็ม"
+                        className="block bg-white border border-border rounded overflow-hidden hover:shadow-md transition-all relative group"
+                        title="คลิกเพื่อดูภาพแยกต่างหาก"
                       >
-                        <img src={img} alt={`Preview ${i}`} className="w-full h-full object-contain p-1" referrerPolicy="no-referrer" />
-                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <span className="bg-black/60 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">ดูภาพเต็ม</span>
+                        <img src={getEnlargedImageUrl(img)} alt={`Preview ${i}`} className="w-auto h-auto max-w-full mx-auto" referrerPolicy="no-referrer" />
+                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                          <span className="bg-black/60 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm shadow-sm">ดูภาพเต็ม</span>
                         </div>
                       </a>
                     ))}
@@ -835,7 +852,7 @@ export default function DashboardPage() {
                     return (
                     <div key={`exist-${i}`} className="flex flex-col border-2 border-dashed border-orange-200 rounded-xl p-3 bg-white gap-3 group">
                       <div className="relative h-32 w-full bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center">
-                        <img src={url} alt="Existing" className="max-h-full max-w-full object-contain" referrerPolicy="no-referrer" />
+                        <img src={getEnlargedImageUrl(url)} alt="Existing" className="max-h-full max-w-full object-contain" referrerPolicy="no-referrer" />
                       </div>
                       <p className="text-xs text-text-muted text-center truncate px-2" title={filename}>
                         {filename}
