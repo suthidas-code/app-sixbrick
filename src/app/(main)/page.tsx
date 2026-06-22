@@ -156,7 +156,7 @@ export default function DashboardPage() {
       const opt = {
         margin:       0.5,
         filename:     `${previewActivity.code}-${previewActivity.name}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
+        image:        { type: 'jpeg' as const, quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true },
         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
       };
