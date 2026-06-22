@@ -32,7 +32,6 @@ const getEnlargedImageUrl = (url: string) => {
     .replace(/=s200/g, '=s500');
 };
 
-const ITEMS_PER_PAGE = 5;
 
 interface UploadedFile {
   name: string;
@@ -55,6 +54,7 @@ export default function DashboardPage() {
   const [skillFilter, setSkillFilter] = useState('');
   const [setFilter, setSetFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   
   const [previewActivity, setPreviewActivity] = useState<Activity | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Activity | null>(null);
@@ -141,10 +141,10 @@ export default function DashboardPage() {
     });
   }, [activities, searchQuery, skillFilter, setFilter]);
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginated = filtered.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   const handleDelete = async () => {
@@ -552,13 +552,34 @@ export default function DashboardPage() {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-gray-50/50">
-            <span className="text-xs text-text-muted">
-              แสดง {(currentPage - 1) * ITEMS_PER_PAGE + 1}–
-              {Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} จาก{' '}
-              {filtered.length} รายการ
-            </span>
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4 py-3 border-t border-border bg-gray-50/50 gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-text-muted">แสดง</span>
+              <select
+                className="text-xs border border-border rounded px-2 py-1 bg-white focus:outline-none focus:border-primary"
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={15}>15</option>
+              </select>
+              <span className="text-xs text-text-muted">รายการต่อหน้า</span>
+            </div>
+            {filtered.length > 0 && (
+              <span className="text-xs text-text-muted">
+                | {(currentPage - 1) * itemsPerPage + 1}–
+                {Math.min(currentPage * itemsPerPage, filtered.length)} จาก{' '}
+                {filtered.length} รายการ
+              </span>
+            )}
+          </div>
+
+          {totalPages > 1 && (
             <div className="flex items-center gap-1">
               <button
                 disabled={currentPage === 1}
@@ -588,8 +609,8 @@ export default function DashboardPage() {
                 <ChevronRight size={16} />
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Preview Panel (Modal) */}
