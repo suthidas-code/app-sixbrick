@@ -147,6 +147,27 @@ export default function DashboardPage() {
     currentPage * itemsPerPage
   );
 
+  const handlePrintPdf = async () => {
+    if (!previewActivity) return;
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const element = document.getElementById('activity-details-content');
+      
+      const opt = {
+        margin:       0.5,
+        filename:     `${previewActivity.code}-${previewActivity.name}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      
+      html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error('Failed to generate PDF', error);
+      alert('ไม่สามารถสร้างไฟล์ PDF ได้');
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     setDeleting(true);
@@ -622,11 +643,19 @@ export default function DashboardPage() {
           >
             <div className="sticky top-0 bg-surface border-b border-border px-6 py-4 flex items-center justify-between z-10">
               <h2 className="font-bold text-lg text-text-main">รายละเอียดกิจกรรม</h2>
-              <button onClick={() => setPreviewActivity(null)} className="text-text-muted hover:text-text-main">
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={handlePrintPdf} 
+                  className="flex items-center gap-1.5 text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 px-3 py-1.5 rounded-md font-medium transition-colors"
+                >
+                  <Download size={16} /> โหลด PDF
+                </button>
+                <button onClick={() => setPreviewActivity(null)} className="text-text-muted hover:text-text-main">
+                  <X size={20} />
+                </button>
+              </div>
             </div>
-            <div className="p-6 space-y-5">
+            <div id="activity-details-content" className="p-6 space-y-5 bg-white">
               <div>
                 <span className="font-mono text-xs bg-orange-100 text-primary px-2 py-0.5 rounded">
                   {previewActivity.code}
