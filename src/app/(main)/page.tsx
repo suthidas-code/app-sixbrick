@@ -57,6 +57,7 @@ export default function DashboardPage() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   
   const [previewActivity, setPreviewActivity] = useState<Activity | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<Activity | null>(null);
 
   // Edit Modal State
@@ -149,24 +150,26 @@ export default function DashboardPage() {
 
   const handlePrintPdf = async () => {
     if (!previewActivity) return;
+    setIsGeneratingPdf(true);
     try {
       const html2pdf = (await import('html2pdf.js')).default;
       const element = document.getElementById('activity-details-content');
       if (!element) return;
       
-      
       const opt = {
         margin:       0.5,
         filename:     `${previewActivity.code}-${previewActivity.name}.pdf`,
         image:        { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
         jsPDF:        { unit: 'in' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
       
-      html2pdf().set(opt).from(element).save();
+      await html2pdf().set(opt).from(element).save();
     } catch (error) {
       console.error('Failed to generate PDF', error);
       alert('ไม่สามารถสร้างไฟล์ PDF ได้');
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -648,9 +651,15 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={handlePrintPdf} 
-                  className="flex items-center gap-1.5 text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 px-3 py-1.5 rounded-md font-medium transition-colors"
+                  disabled={isGeneratingPdf}
+                  className="flex items-center gap-1.5 text-sm bg-orange-100 text-orange-700 hover:bg-orange-200 px-3 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Download size={16} /> โหลด PDF
+                  {isGeneratingPdf ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Download size={16} />
+                  )}
+                  {isGeneratingPdf ? 'กำลังสร้าง PDF...' : 'โหลด PDF'}
                 </button>
                 <button onClick={() => setPreviewActivity(null)} className="text-text-muted hover:text-text-main">
                   <X size={20} />
