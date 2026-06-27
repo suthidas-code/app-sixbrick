@@ -156,19 +156,42 @@ export default function DashboardPage() {
       const html2pdf = html2pdfModule.default || html2pdfModule;
       const element = document.getElementById('activity-details-content');
       if (!element) return;
-      
+
+      // Clone element so we can modify it without affecting the UI
+      const clone = element.cloneNode(true) as HTMLElement;
+      clone.style.width = '450px';
+      clone.style.position = 'absolute';
+      clone.style.left = '-9999px';
+      clone.style.top = '0';
+      clone.style.background = '#ffffff';
+
+      // Replace cross-origin images with a text placeholder
+      const imgs = clone.querySelectorAll('img');
+      imgs.forEach((img) => {
+        const placeholder = document.createElement('div');
+        placeholder.style.cssText = 'padding:12px;background:#f3f4f6;border:1px solid #d1d5db;border-radius:6px;text-align:center;color:#6b7280;font-size:12px;margin:4px 0;';
+        placeholder.textContent = `\u0e20\u0e32\u0e1e: ${img.alt || 'Activity Image'} (\u0e14\u0e39\u0e20\u0e32\u0e1e\u0e44\u0e14\u0e49\u0e17\u0e35\u0e48\u0e2b\u0e19\u0e49\u0e32\u0e40\u0e27\u0e47\u0e1a)`;
+        img.parentNode?.replaceChild(placeholder, img);
+      });
+
+      document.body.appendChild(clone);
+
       const opt = {
         margin:       0.5,
         filename:     `${previewActivity.code}-${previewActivity.name}.pdf`,
         image:        { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, allowTaint: true, logging: false },
+        html2canvas:  { scale: 2, useCORS: false, logging: false },
         jsPDF:        { unit: 'in' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
       
-      await html2pdf().set(opt).from(element).save();
+      await html2pdf().set(opt).from(clone).save();
+      document.body.removeChild(clone);
     } catch (error) {
       console.error('Failed to generate PDF', error);
-      alert(`ไม่สามารถสร้างไฟล์ PDF ได้: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Clean up cloned element if it exists
+      const leftover = document.querySelector('[style*="left: -9999px"]');
+      if (leftover) leftover.remove();
+      alert(`\u0e44\u0e21\u0e48\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e2a\u0e23\u0e49\u0e32\u0e07\u0e44\u0e1f\u0e25\u0e4c PDF \u0e44\u0e14\u0e49: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -733,7 +756,7 @@ export default function DashboardPage() {
                         className="block bg-white border border-border rounded overflow-hidden hover:shadow-md transition-all relative group"
                         title="คลิกเพื่อดูภาพแยกต่างหาก"
                       >
-                        <img src={getEnlargedImageUrl(img)} alt={`Preview ${i}`} crossOrigin="anonymous" className="w-auto h-auto max-w-full mx-auto" referrerPolicy="no-referrer" />
+                        <img src={getEnlargedImageUrl(img)} alt={`Preview ${i}`} className="w-auto h-auto max-w-full mx-auto" referrerPolicy="no-referrer" />
                         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                           <span className="bg-black/60 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm shadow-sm">ดูภาพเต็ม</span>
                         </div>
